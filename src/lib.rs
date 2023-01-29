@@ -2,6 +2,8 @@ use bevy::prelude::Mesh;
 use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
 
+use bevy::render::mesh::shape::Cube;
+
 #[derive(Debug, Clone, Copy)]
 pub struct CubeSphere {
     pub radius: f32,
@@ -27,6 +29,7 @@ impl From<CubeSphere> for Mesh {
         }
 
         const FACE_CNT: usize = 6;
+        const UV_SEP: f32 = 1. / 3.;
 
         let mut points: Vec<[f32; 3]> = Vec::with_capacity(FACE_CNT * sphere.resolution.pow(2));
         let mut normals: Vec<[f32; 3]> = Vec::with_capacity(FACE_CNT * sphere.resolution.pow(2));
@@ -45,12 +48,11 @@ impl From<CubeSphere> for Mesh {
                 let y = (iy as f32) * sep - 1.;
 
                 let raw = [x, y, 1.];
-                let normal = to_normal(raw);
+                let normal = raw_to_normal(raw);
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
-                // TODO: fix
-                uvs.push([x, y]);
+                uvs.push([uv_scale(x), uv_scale(y)]);
             }
         }
         // Right
@@ -60,7 +62,7 @@ impl From<CubeSphere> for Mesh {
                 let y = (iy as f32) * sep - 1.;
 
                 let raw = [1., y, z];
-                let normal = to_normal(raw);
+                let normal = raw_to_normal(raw);
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
@@ -74,7 +76,7 @@ impl From<CubeSphere> for Mesh {
                 let y = (iy as f32) * sep - 1.;
 
                 let raw = [x, y, -1.];
-                let normal = to_normal(raw);
+                let normal = raw_to_normal(raw);
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
@@ -88,7 +90,7 @@ impl From<CubeSphere> for Mesh {
                 let y = (iy as f32) * sep - 1.;
 
                 let raw = [-1., y, z];
-                let normal = to_normal(raw);
+                let normal = raw_to_normal(raw);
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
@@ -102,7 +104,7 @@ impl From<CubeSphere> for Mesh {
                 let z = 1. - (iz as f32) * sep;
 
                 let raw = [x, 1., z];
-                let normal = to_normal(raw);
+                let normal = raw_to_normal(raw);
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
@@ -116,7 +118,7 @@ impl From<CubeSphere> for Mesh {
                 let z = (iz as f32) * sep - 1.;
 
                 let raw = [x, -1., z];
-                let normal = to_normal(raw);
+                let normal = raw_to_normal(raw);
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
@@ -153,7 +155,7 @@ impl From<CubeSphere> for Mesh {
 
 // convert cube vertex [-1, 1] to normal
 // from https://catlikecoding.com/unity/tutorials/cube-sphere/
-fn to_normal(i: [f32; 3]) -> [f32; 3] {
+fn raw_to_normal(i: [f32; 3]) -> [f32; 3] {
     let x = i[0];
     let y = i[1];
     let z = i[2];
@@ -167,4 +169,9 @@ fn to_normal(i: [f32; 3]) -> [f32; 3] {
     let nz = z * (1. - x2 / 2. - y2 / 2. + x2 * y2 / 3.).sqrt();
 
     return [nx, ny, nz];
+}
+
+// convert from [-1, 1] to [0, 1/3]
+fn uv_scale(i: f32) -> f32 {
+    (i + 1.) / 6.
 }
