@@ -45,10 +45,11 @@ impl From<CubeSphere> for Mesh {
                 let y = (iy as f32) * sep - 1.;
 
                 let raw = [x, y, 1.];
+                let normal = to_normal(raw);
 
+                points.push(normal.map(|e| e * r));
+                normals.push(normal);
                 // TODO: fix
-                points.push(raw);
-                normals.push([0.0, 0.0, 1.0]);
                 uvs.push([x, y]);
             }
         }
@@ -57,11 +58,12 @@ impl From<CubeSphere> for Mesh {
             let z = 1. - (iz as f32) * sep;
             for iy in 0..n {
                 let y = (iy as f32) * sep - 1.;
-                let raw = [1., y, z];
 
-                // TODO: fix
-                points.push(raw);
-                normals.push([1.0, 0.0, 0.0]);
+                let raw = [1., y, z];
+                let normal = to_normal(raw);
+
+                points.push(normal.map(|e| e * r));
+                normals.push(normal);
                 uvs.push([z, y]);
             }
         }
@@ -70,11 +72,12 @@ impl From<CubeSphere> for Mesh {
             let x = 1. - (ix as f32) * sep;
             for iy in 0..n {
                 let y = (iy as f32) * sep - 1.;
-                let raw = [x, y, -1.];
 
-                // TODO: fix
-                points.push(raw);
-                normals.push([0.0, 0.0, -1.0]);
+                let raw = [x, y, -1.];
+                let normal = to_normal(raw);
+
+                points.push(normal.map(|e| e * r));
+                normals.push(normal);
                 uvs.push([x, y]);
             }
         }
@@ -83,11 +86,12 @@ impl From<CubeSphere> for Mesh {
             let z = (iz as f32) * sep - 1.;
             for iy in 0..n {
                 let y = (iy as f32) * sep - 1.;
-                let raw = [-1., y, z];
 
-                // TODO: fix
-                points.push(raw);
-                normals.push([-1.0, 0.0, 0.0]);
+                let raw = [-1., y, z];
+                let normal = to_normal(raw);
+
+                points.push(normal.map(|e| e * r));
+                normals.push(normal);
                 uvs.push([z, y]);
             }
         }
@@ -96,11 +100,12 @@ impl From<CubeSphere> for Mesh {
             let x = (ix as f32) * sep - 1.;
             for iz in 0..n {
                 let z = 1. - (iz as f32) * sep;
-                let raw = [x, 1., z];
 
-                // TODO: fix
-                points.push(raw);
-                normals.push([0.0, 1.0, 0.0]);
+                let raw = [x, 1., z];
+                let normal = to_normal(raw);
+
+                points.push(normal.map(|e| e * r));
+                normals.push(normal);
                 uvs.push([x, z]);
             }
         }
@@ -109,11 +114,12 @@ impl From<CubeSphere> for Mesh {
             let x = (ix as f32) * sep - 1.;
             for iz in 0..n {
                 let z = (iz as f32) * sep - 1.;
-                let raw = [x, -1., z];
 
-                // TODO: fix
-                points.push(raw);
-                normals.push([0.0, -1.0, 0.0]);
+                let raw = [x, -1., z];
+                let normal = to_normal(raw);
+
+                points.push(normal.map(|e| e * r));
+                normals.push(normal);
                 uvs.push([x, z]);
             }
         }
@@ -146,6 +152,19 @@ impl From<CubeSphere> for Mesh {
 }
 
 // convert cube vertex [-1, 1] to normal
+// from https://catlikecoding.com/unity/tutorials/cube-sphere/
 fn to_normal(i: [f32; 3]) -> [f32; 3] {
-    todo!()
+    let x = i[0];
+    let y = i[1];
+    let z = i[2];
+
+    let x2 = x.powf(2.);
+    let y2 = y.powf(2.);
+    let z2 = z.powf(2.);
+
+    let nx = x * (1. - y2 / 2. - z2 / 2. + y2 * z2 / 3.).sqrt();
+    let ny = y * (1. - x2 / 2. - z2 / 2. + x2 * z2 / 3.).sqrt();
+    let nz = z * (1. - x2 / 2. - y2 / 2. + x2 * y2 / 3.).sqrt();
+
+    return [nx, ny, nz];
 }
