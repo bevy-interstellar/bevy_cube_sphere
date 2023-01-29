@@ -2,8 +2,6 @@ use bevy::prelude::Mesh;
 use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
 
-use bevy::prelude::shape::Cube;
-
 #[derive(Debug, Clone, Copy)]
 pub struct CubeSphere {
     pub radius: f32,
@@ -54,47 +52,73 @@ impl From<CubeSphere> for Mesh {
                 uvs.push([x, y]);
             }
         }
-        // // Right
-        // for iz in 0..n {
-        //     let z = 1. - (iz as f32) * sep;
-        //     for iy in 0..n {
-        //         let y = (iy as f32) * sep - 1.;
-        //         let raw = [1., y, z];
+        // Right
+        for iz in 0..n {
+            let z = 1. - (iz as f32) * sep;
+            for iy in 0..n {
+                let y = (iy as f32) * sep - 1.;
+                let raw = [1., y, z];
 
-        //         // TODO: fix
-        //         points.push(raw);
-        //         normals.push([1.0, 0.0, 0.0]);
-        //         uvs.push([z, y]);
-        //     }
-        // }
-        // // Back
-        // for ix in 0..n {
-        //     let x = 1. - (ix as f32) * sep;
-        //     for iy in 0..n {
-        //         let y = (iy as f32) * sep - 1.;
-        //         let raw = [x, y, -1.];
+                // TODO: fix
+                points.push(raw);
+                normals.push([1.0, 0.0, 0.0]);
+                uvs.push([z, y]);
+            }
+        }
+        // Back
+        for ix in 0..n {
+            let x = 1. - (ix as f32) * sep;
+            for iy in 0..n {
+                let y = (iy as f32) * sep - 1.;
+                let raw = [x, y, -1.];
 
-        //         // TODO: fix
-        //         points.push(raw);
-        //         normals.push([0.0, 0.0, -1.0]);
-        //         uvs.push([x, y]);
-        //     }
-        // }
-        // // Left
-        // for iz in 0..n {
-        //     let z = (iz as f32) * sep - 1.;
-        //     for iy in 0..n {
-        //         let y = (iy as f32) * sep - 1.;
-        //         let raw = [-1., y, z];
+                // TODO: fix
+                points.push(raw);
+                normals.push([0.0, 0.0, -1.0]);
+                uvs.push([x, y]);
+            }
+        }
+        // Left
+        for iz in 0..n {
+            let z = (iz as f32) * sep - 1.;
+            for iy in 0..n {
+                let y = (iy as f32) * sep - 1.;
+                let raw = [-1., y, z];
 
-        //         // TODO: fix
-        //         points.push(raw);
-        //         normals.push([-1.0, 0.0, 0.0]);
-        //         uvs.push([z, y]);
-        //     }
-        // }
+                // TODO: fix
+                points.push(raw);
+                normals.push([-1.0, 0.0, 0.0]);
+                uvs.push([z, y]);
+            }
+        }
+        // Top
+        for ix in 0..n {
+            let x = (ix as f32) * sep - 1.;
+            for iz in 0..n {
+                let z = 1. - (iz as f32) * sep;
+                let raw = [x, 1., z];
 
-        for f in 0..2 {
+                // TODO: fix
+                points.push(raw);
+                normals.push([0.0, 1.0, 0.0]);
+                uvs.push([x, z]);
+            }
+        }
+        // Bottom
+        for ix in 0..n {
+            let x = (ix as f32) * sep - 1.;
+            for iz in 0..n {
+                let z = (iz as f32) * sep - 1.;
+                let raw = [x, -1., z];
+
+                // TODO: fix
+                points.push(raw);
+                normals.push([0.0, -1.0, 0.0]);
+                uvs.push([x, z]);
+            }
+        }
+
+        for f in 0..FACE_CNT as u32 {
             for x in 0..n - 1 {
                 for y in 0..n - 1 {
                     let i = f * n.pow(2) + y * n + x;
@@ -110,39 +134,6 @@ impl From<CubeSphere> for Mesh {
                 }
             }
         }
-
-        // // Right
-
-        //     // Top
-        //     ([sp.min_x, sp.min_y, sp.max_z], [0., 0., 1.0], [0., 0.]),
-        //     ([sp.max_x, sp.min_y, sp.max_z], [0., 0., 1.0], [1.0, 0.]),
-        //     ([sp.max_x, sp.max_y, sp.max_z], [0., 0., 1.0], [1.0, 1.0]),
-        //     ([sp.min_x, sp.max_y, sp.max_z], [0., 0., 1.0], [0., 1.0]),
-        //     // Bottom
-        //     ([sp.min_x, sp.max_y, sp.min_z], [0., 0., -1.0], [1.0, 0.]),
-        //     ([sp.max_x, sp.max_y, sp.min_z], [0., 0., -1.0], [0., 0.]),
-        //     ([sp.max_x, sp.min_y, sp.min_z], [0., 0., -1.0], [0., 1.0]),
-        //     ([sp.min_x, sp.min_y, sp.min_z], [0., 0., -1.0], [1.0, 1.0]),
-        //     // Right
-        //     ([sp.max_x, sp.min_y, sp.min_z], [1.0, 0., 0.], [0., 0.]),
-        //     ([sp.max_x, sp.max_y, sp.min_z], [1.0, 0., 0.], [1.0, 0.]),
-        //     ([sp.max_x, sp.max_y, sp.max_z], [1.0, 0., 0.], [1.0, 1.0]),
-        //     ([sp.max_x, sp.min_y, sp.max_z], [1.0, 0., 0.], [0., 1.0]),
-        //     // Left
-        //     ([sp.min_x, sp.min_y, sp.max_z], [-1.0, 0., 0.], [1.0, 0.]),
-        //     ([sp.min_x, sp.max_y, sp.max_z], [-1.0, 0., 0.], [0., 0.]),
-        //     ([sp.min_x, sp.max_y, sp.min_z], [-1.0, 0., 0.], [0., 1.0]),
-        //     ([sp.min_x, sp.min_y, sp.min_z], [-1.0, 0., 0.], [1.0, 1.0]),
-        //     // Front
-        //     ([sp.max_x, sp.max_y, sp.min_z], [0., 1.0, 0.], [1.0, 0.]),
-        //     ([sp.min_x, sp.max_y, sp.min_z], [0., 1.0, 0.], [0., 0.]),
-        //     ([sp.min_x, sp.max_y, sp.max_z], [0., 1.0, 0.], [0., 1.0]),
-        //     ([sp.max_x, sp.max_y, sp.max_z], [0., 1.0, 0.], [1.0, 1.0]),
-        //     // Back
-        //     ([sp.max_x, sp.min_y, sp.max_z], [0., -1.0, 0.], [0., 0.]),
-        //     ([sp.min_x, sp.min_y, sp.max_z], [0., -1.0, 0.], [1.0, 0.]),
-        //     ([sp.min_x, sp.min_y, sp.min_z], [0., -1.0, 0.], [1.0, 1.0]),
-        //     ([sp.max_x, sp.min_y, sp.min_z], [0., -1.0, 0.], [0., 1.0]),
 
         let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
         mesh.set_indices(Some(Indices::U32(indices)));
