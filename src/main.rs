@@ -1,7 +1,7 @@
 use bevy::{
     pbr::wireframe::{Wireframe, WireframeConfig, WireframePlugin},
     prelude::*,
-    render::{render_resource::WgpuFeatures, settings::WgpuSettings, RenderPlugin},
+    render::{render_resource::WgpuFeatures, settings::WgpuSettings},
 };
 
 use bevy::render::render_resource::Face;

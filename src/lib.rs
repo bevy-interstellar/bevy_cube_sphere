@@ -2,8 +2,6 @@ use bevy::prelude::Mesh;
 use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
 
-use bevy::render::mesh::shape::Cube;
-
 #[derive(Debug, Clone, Copy)]
 pub struct CubeSphere {
     pub radius: f32,
