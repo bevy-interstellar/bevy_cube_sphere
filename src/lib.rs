@@ -29,7 +29,9 @@ impl From<CubeSphere> for Mesh {
         }
 
         const FACE_CNT: usize = 6;
-        const UV_SEP: f32 = 1. / 3.;
+        const UV_1: f32 = 1. / 3.;
+        const UV_2: f32 = 2. / 3.;
+        const UV_3: f32 = 1.;
 
         let mut points: Vec<[f32; 3]> = Vec::with_capacity(FACE_CNT * sphere.resolution.pow(2));
         let mut normals: Vec<[f32; 3]> = Vec::with_capacity(FACE_CNT * sphere.resolution.pow(2));
@@ -52,7 +54,7 @@ impl From<CubeSphere> for Mesh {
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
-                uvs.push([uv_scale(x), uv_scale(y)]);
+                uvs.push([uv_scale(x), UV_3 - uv_scale(y)]);
             }
         }
         // Right
@@ -66,7 +68,7 @@ impl From<CubeSphere> for Mesh {
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
-                uvs.push([z, y]);
+                uvs.push([UV_1 + uv_scale(z), UV_2 + uv_scale(y)]);
             }
         }
         // Back
@@ -80,7 +82,7 @@ impl From<CubeSphere> for Mesh {
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
-                uvs.push([x, y]);
+                uvs.push([uv_scale(x), uv_scale(y)]);
             }
         }
         // Left
@@ -94,7 +96,7 @@ impl From<CubeSphere> for Mesh {
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
-                uvs.push([z, y]);
+                uvs.push([UV_1 + uv_scale(z), UV_1 - uv_scale(y)]);
             }
         }
         // Top
@@ -108,7 +110,7 @@ impl From<CubeSphere> for Mesh {
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
-                uvs.push([x, z]);
+                uvs.push([uv_scale(x), UV_1 + uv_scale(z)]);
             }
         }
         // Bottom
@@ -122,7 +124,7 @@ impl From<CubeSphere> for Mesh {
 
                 points.push(normal.map(|e| e * r));
                 normals.push(normal);
-                uvs.push([x, z]);
+                uvs.push([UV_1 + uv_scale(z), UV_1 + uv_scale(x)]);
             }
         }
 
