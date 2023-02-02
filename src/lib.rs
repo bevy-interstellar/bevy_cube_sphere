@@ -237,34 +237,37 @@ fn unit_sphere_point_to_uv(pt: &[f32; 3], f: CubeFace) -> [f32; 2] {
     let z = pt[2];
 
     fn scale(i: f32) -> f32 {
-        (i + 1.) * 0.5 * UV_SPHERE_RADIUS
+        (i + 1.) * UV_SPHERE_RADIUS
     }
 
     fn flip(i: f32) -> f32 {
-        UV_SPHERE_RADIUS - i
+        UV_SPHERE_RADIUS * 2. - i
     }
 
     match f {
         CubeFace::Front => [
             UV_COORDINATE_0[0] + scale(x),
-            UV_COORDINATE_0[1] + flip(scale(y)),
+            1. - (UV_COORDINATE_0[1] + scale(y)),
         ],
         CubeFace::Back => [
             UV_COORDINATE_3[0] + flip(scale(x)),
-            UV_COORDINATE_3[1] + flip(scale(y)),
+            1. - (UV_COORDINATE_3[1] + scale(y)),
         ],
         CubeFace::Left => [
             UV_COORDINATE_2[0] + scale(z),
-            UV_COORDINATE_2[1] + flip(scale(y)),
+            1. - (UV_COORDINATE_2[1] + scale(y)),
         ],
         CubeFace::Right => [
             UV_COORDINATE_5[0] + flip(scale(z)),
-            UV_COORDINATE_5[1] + flip(scale(y)),
+            1. - (UV_COORDINATE_5[1] + scale(y)),
         ],
-        CubeFace::Top => [UV_COORDINATE_1[0] + scale(x), UV_COORDINATE_1[1] + scale(z)],
+        CubeFace::Top => [
+            UV_COORDINATE_1[0] + scale(x),
+            1. - (UV_COORDINATE_1[1] + flip(scale(z))),
+        ],
         CubeFace::Bottom => [
             UV_COORDINATE_4[0] + scale(x),
-            UV_COORDINATE_4[1] + flip(scale(z)),
+            1. - (UV_COORDINATE_4[1] + scale(z)),
         ],
     }
 }
@@ -307,5 +310,24 @@ fn insert_indices(n: u32, indices: &mut Vec<u32>) {
                 indices.push(i + n + 1);
             }
         }
+    }
+}
+
+impl CubeSphere {
+    // unit sphere point to all possible uv location
+    fn point_to_uvs(pt: &[f32; 3]) -> [[f32; 2]; 3] {
+        todo!()
+    }
+
+    fn uv_to_point(uv: &[f32; 2]) -> Option<[f32; 3]> {
+        todo!()
+    }
+
+    fn uv_to_normal(pt: &[f32; 3]) -> Option<[f32; 3]> {
+        todo!()
+    }
+
+    fn uv_to_tangent(pt: &[f32; 3]) -> Option<[f32; 3]> {
+        todo!()
     }
 }
