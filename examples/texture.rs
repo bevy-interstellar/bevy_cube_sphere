@@ -22,7 +22,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let mesh: Mesh = CubeSphere::default().into();
-    let texture_handle = asset_server.load("texture/color.png");
+    let texture_handle = asset_server.load("textures/color.png");
 
     commands.spawn((
         PbrBundle {
