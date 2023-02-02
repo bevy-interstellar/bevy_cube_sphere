@@ -364,9 +364,9 @@ impl CubeSphere {
         let face = CubeSphere::uv_to_face(uv);
         let coord = face_to_uv_coordinate(face);
         let u = uv[0] - coord[0] - UV_SPHERE_RADIUS;
-        let v = uv[0] - coord[1] - UV_SPHERE_RADIUS;
+        let v = uv[1] - coord[1] - UV_SPHERE_RADIUS;
 
-        let w2 = 1. - u.powi(2) - v.powi(2);
+        let w2 = UV_SPHERE_RADIUS.powi(2) - u.powi(2) - v.powi(2);
         if w2 < 0. {
             None
         } else {

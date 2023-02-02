@@ -9,6 +9,9 @@ edition = "2021"
 bevy = "0.9.1"
 float-ord = "0.3.2"
 
+[dev-dependencies]
+image = "0.24.5"
+
 # Enable a small amount of optimization in debug mode
 [profile.dev]
 opt-level = 1
