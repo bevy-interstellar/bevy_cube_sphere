@@ -41,7 +41,7 @@ impl From<CubeSphere> for Mesh {
         let total_point_count = CUBE_FACE_COUNT * sphere.resolution.pow(2);
         let mut points: Vec<[f32; 3]> = Vec::with_capacity(total_point_count);
         let mut normals: Vec<[f32; 3]> = Vec::with_capacity(total_point_count);
-        let mut tangents: Vec<[f32; 3]> = Vec::with_capacity(total_point_count);
+        let mut tangents: Vec<[f32; 4]> = Vec::with_capacity(total_point_count);
         let mut uvs: Vec<[f32; 2]> = Vec::with_capacity(total_point_count);
 
         let n = sphere.resolution as u32;
@@ -165,6 +165,7 @@ impl From<CubeSphere> for Mesh {
         mesh.set_indices(Some(Indices::U32(indices)));
         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, points);
         mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, normals);
+        mesh.insert_attribute(Mesh::ATTRIBUTE_TANGENT, tangents);
         mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
 
         mesh
@@ -197,7 +198,7 @@ fn unit_sphere_point_to_normal(pt: &[f32; 3]) -> [f32; 3] {
     return *pt;
 }
 
-fn unit_sphere_point_to_tangent(pt: &[f32; 3], f: CubeFace) -> [f32; 3] {
+fn unit_sphere_point_to_tangent(pt: &[f32; 3], f: CubeFace) -> [f32; 4] {
     let normal = unit_sphere_point_to_normal(pt);
     let other = match f {
         CubeFace::Front | CubeFace::Back | CubeFace::Left | CubeFace::Right => {
@@ -219,7 +220,7 @@ fn unit_sphere_point_to_tangent(pt: &[f32; 3], f: CubeFace) -> [f32; 3] {
     let c = v * w - u * y;
     let norm = (a.powi(2) + b.powi(2) + c.powi(2)).sqrt();
 
-    [a / norm, b / norm, c / norm]
+    [a / norm, b / norm, c / norm, 1.]
 }
 
 // http://hydra.nat.uni-magdeburg.de/packing/csq/csq.html
@@ -278,7 +279,7 @@ fn insert_attributes(
     face: CubeFace,
     points: &mut Vec<[f32; 3]>,
     normals: &mut Vec<[f32; 3]>,
-    tangents: &mut Vec<[f32; 3]>,
+    tangents: &mut Vec<[f32; 4]>,
     uvs: &mut Vec<[f32; 2]>,
 ) {
     let unit_sphere_point = unit_cube_point_to_unit_sphere_point(unit_cube_point);
