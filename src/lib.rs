@@ -1,6 +1,7 @@
 use bevy::prelude::Mesh;
 use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
+use float_ord::FloatOrd;
 
 #[derive(Debug, Clone, Copy)]
 pub struct CubeSphere {
@@ -232,6 +233,17 @@ const UV_COORDINATE_3: [f32; 2] = [0.0000000, 0.4164259];
 const UV_COORDINATE_4: [f32; 2] = [0.6246388, 0.4164259];
 const UV_COORDINATE_5: [f32; 2] = [0.3123194, 0.6246388];
 
+fn face_to_uv_coordinate(f: CubeFace) -> [f32; 2] {
+    match f {
+        CubeFace::Front => UV_COORDINATE_0,
+        CubeFace::Back => UV_COORDINATE_3,
+        CubeFace::Left => UV_COORDINATE_2,
+        CubeFace::Right => UV_COORDINATE_5,
+        CubeFace::Top => UV_COORDINATE_1,
+        CubeFace::Bottom => UV_COORDINATE_4,
+    }
+}
+
 fn unit_sphere_point_to_uv(pt: &[f32; 3], f: CubeFace) -> [f32; 2] {
     let x = pt[0];
     let y = pt[1];
@@ -245,31 +257,15 @@ fn unit_sphere_point_to_uv(pt: &[f32; 3], f: CubeFace) -> [f32; 2] {
         UV_SPHERE_RADIUS * 2. - i
     }
 
+    let coord = face_to_uv_coordinate(f);
+
     match f {
-        CubeFace::Front => [
-            UV_COORDINATE_0[0] + scale(x),
-            1. - (UV_COORDINATE_0[1] + scale(y)),
-        ],
-        CubeFace::Back => [
-            UV_COORDINATE_3[0] + flip(scale(x)),
-            1. - (UV_COORDINATE_3[1] + scale(y)),
-        ],
-        CubeFace::Left => [
-            UV_COORDINATE_2[0] + scale(z),
-            1. - (UV_COORDINATE_2[1] + scale(y)),
-        ],
-        CubeFace::Right => [
-            UV_COORDINATE_5[0] + flip(scale(z)),
-            1. - (UV_COORDINATE_5[1] + scale(y)),
-        ],
-        CubeFace::Top => [
-            UV_COORDINATE_1[0] + scale(x),
-            1. - (UV_COORDINATE_1[1] + flip(scale(z))),
-        ],
-        CubeFace::Bottom => [
-            UV_COORDINATE_4[0] + scale(x),
-            1. - (UV_COORDINATE_4[1] + scale(z)),
-        ],
+        CubeFace::Front => [coord[0] + scale(x), 1. - (coord[1] + scale(y))],
+        CubeFace::Back => [coord[0] + flip(scale(x)), 1. - (coord[1] + scale(y))],
+        CubeFace::Left => [coord[0] + scale(z), 1. - (coord[1] + scale(y))],
+        CubeFace::Right => [coord[0] + flip(scale(z)), 1. - (coord[1] + scale(y))],
+        CubeFace::Top => [coord[0] + scale(x), 1. - (coord[1] + flip(scale(z)))],
+        CubeFace::Bottom => [coord[0] + scale(x), 1. - (coord[1] + scale(z))],
     }
 }
 
@@ -316,19 +312,79 @@ fn insert_indices(n: u32, indices: &mut Vec<u32>) {
 
 impl CubeSphere {
     // unit sphere point to all possible uv location
-    fn point_to_uvs(pt: &[f32; 3]) -> [[f32; 2]; 3] {
-        todo!()
+    pub fn point_to_uvs(pt: &[f32; 3]) -> [[f32; 2]; 3] {
+        let x = pt[0];
+        let y = pt[1];
+        let z = pt[2];
+
+        let face_x = if x > 0. {
+            unit_sphere_point_to_uv(pt, CubeFace::Right)
+        } else {
+            unit_sphere_point_to_uv(pt, CubeFace::Left)
+        };
+
+        let face_y = if y > 0. {
+            unit_sphere_point_to_uv(pt, CubeFace::Top)
+        } else {
+            unit_sphere_point_to_uv(pt, CubeFace::Bottom)
+        };
+
+        let face_z = if z > 0. {
+            unit_sphere_point_to_uv(pt, CubeFace::Front)
+        } else {
+            unit_sphere_point_to_uv(pt, CubeFace::Back)
+        };
+
+        [face_x, face_y, face_z]
     }
 
-    fn uv_to_point(uv: &[f32; 2]) -> Option<[f32; 3]> {
-        todo!()
+    fn uv_to_face(uv: &[f32; 2]) -> CubeFace {
+        [
+            CubeFace::Front,
+            CubeFace::Back,
+            CubeFace::Left,
+            CubeFace::Right,
+            CubeFace::Top,
+            CubeFace::Bottom,
+        ]
+        .into_iter()
+        .min_by_key(|f| {
+            let u = uv[0];
+            let v = uv[1];
+
+            let x = face_to_uv_coordinate(*f)[0] + UV_SPHERE_RADIUS;
+            let y = face_to_uv_coordinate(*f)[1] + UV_SPHERE_RADIUS;
+
+            FloatOrd((x - u).powi(2) + (v - y).powi(2))
+        })
+        .unwrap()
     }
 
-    fn uv_to_normal(pt: &[f32; 3]) -> Option<[f32; 3]> {
-        todo!()
+    pub fn uv_to_point(uv: &[f32; 2]) -> Option<[f32; 3]> {
+        let face = CubeSphere::uv_to_face(uv);
+        let coord = face_to_uv_coordinate(face);
+        let u = uv[0] - coord[0] - UV_SPHERE_RADIUS;
+        let v = uv[0] - coord[1] - UV_SPHERE_RADIUS;
+
+        let w2 = 1. - u.powi(2) - v.powi(2);
+        if w2 < 0. {
+            None
+        } else {
+            let w = w2.sqrt();
+            Some(match face {
+                CubeFace::Front | CubeFace::Back => [u, v, w],
+                CubeFace::Left | CubeFace::Right => [w, v, u],
+                CubeFace::Top | CubeFace::Bottom => [u, w, v],
+            })
+        }
     }
 
-    fn uv_to_tangent(pt: &[f32; 3]) -> Option<[f32; 3]> {
-        todo!()
+    pub fn uv_to_normal(uv: &[f32; 2]) -> Option<[f32; 3]> {
+        CubeSphere::uv_to_point(uv).map(|pt| unit_sphere_point_to_normal(&pt))
+    }
+
+    pub fn uv_to_tangent(uv: &[f32; 2]) -> Option<[f32; 4]> {
+        let face = CubeSphere::uv_to_face(uv);
+        CubeSphere::uv_to_point(uv).map(|pt| unit_sphere_point_to_tangent(&pt, face))
     }
 }

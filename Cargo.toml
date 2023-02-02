@@ -1,12 +1,13 @@
 [package]
 name = "bevy_cube_sphere"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 bevy = "0.9.1"
+float-ord = "0.3.2"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
