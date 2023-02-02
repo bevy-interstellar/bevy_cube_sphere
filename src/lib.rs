@@ -218,7 +218,7 @@ fn unit_sphere_point_to_tangent(pt: &[f32; 3], f: CubeFace) -> [f32; 4] {
 
     let a = w * y - v * z;
     let b = u * z - w * x;
-    let c = v * w - u * y;
+    let c = v * x - u * y;
     let norm = (a.powi(2) + b.powi(2) + c.powi(2)).sqrt();
 
     [a / norm, b / norm, c / norm, 1.]
