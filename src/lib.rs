@@ -3,17 +3,20 @@ use bevy::render::mesh::Indices;
 use bevy::render::render_resource::PrimitiveTopology;
 use float_ord::FloatOrd;
 
+/// a cube sphere
 #[derive(Debug, Clone, Copy)]
 pub struct CubeSphere {
+    /// the radius of the sphere
     pub radius: f32,
+    /// the number of vertices on the edge of the cube.
     pub resolution: usize,
 }
 
 impl Default for CubeSphere {
     fn default() -> Self {
         CubeSphere {
-            radius: 1.0,   // radius
-            resolution: 8, // number of vertices per side
+            radius: 1.0,
+            resolution: 8,
         }
     }
 }
@@ -173,8 +176,11 @@ impl From<CubeSphere> for Mesh {
     }
 }
 
-// convert cube vertex [-1, 1] to sphere vertex [-1, 1]
-// from https://catlikecoding.com/unity/tutorials/cube-sphere/
+/// convert a unit cube vertex to a unit sphere vertex
+/// ## Arguments
+/// - `pt` - the location of cube vertex, range of `[-1, 1]`
+/// ## Return
+/// - the location of sphere vertex, range of `[-1, 1]`
 fn unit_cube_point_to_unit_sphere_point(pt: &[f32; 3]) -> [f32; 3] {
     let x = pt[0];
     let y = pt[1];
@@ -191,14 +197,31 @@ fn unit_cube_point_to_unit_sphere_point(pt: &[f32; 3]) -> [f32; 3] {
     return [nx, ny, nz];
 }
 
+/// convert a unit sphere vertex to a sphere vertex based on radius
+/// ## Arguments
+/// - `pt` - the location of sphere vertex, range of `[-1, 1]`
+/// - `r` - the radius of the returned sphere
+/// ## Return
+/// - the location of sphere vertex, range of `[-r, r]`
 fn unit_sphere_point_to_sphere_point(pt: &[f32; 3], r: f32) -> [f32; 3] {
     return pt.map(|e| e * r);
 }
 
+/// compute normal vector for a unit sphere vertex
+/// ## Arguments
+/// - `pt` - the location of sphere vertex, range of `[-1, 1]`
+/// ## Return
+/// - the normal vector on that specific vertex
 fn unit_sphere_point_to_normal(pt: &[f32; 3]) -> [f32; 3] {
     return *pt;
 }
 
+/// compute tangent vector for a unit sphere vertex
+/// ## Arguments
+/// - `pt` - the location of sphere vertex, range of `[-1, 1]`
+/// - `f` - the face that this vertex belongs to in its original cube
+/// ## Return
+/// - the tangent vector on that specific vertex
 fn unit_sphere_point_to_tangent(pt: &[f32; 3], f: CubeFace) -> [f32; 4] {
     let normal = unit_sphere_point_to_normal(pt);
     let other = match f {
@@ -224,7 +247,6 @@ fn unit_sphere_point_to_tangent(pt: &[f32; 3], f: CubeFace) -> [f32; 4] {
     [a / norm, b / norm, c / norm, 1.]
 }
 
-// http://hydra.nat.uni-magdeburg.de/packing/csq/csq.html
 const UV_SPHERE_RADIUS: f32 = 0.1876806;
 const UV_COORDINATE_0: [f32; 2] = [0.0000000, 0.0000000];
 const UV_COORDINATE_1: [f32; 2] = [0.6246388, 0.0000000];
@@ -233,6 +255,11 @@ const UV_COORDINATE_3: [f32; 2] = [0.0000000, 0.4164259];
 const UV_COORDINATE_4: [f32; 2] = [0.6246388, 0.4164259];
 const UV_COORDINATE_5: [f32; 2] = [0.3123194, 0.6246388];
 
+/// face and its corresponding uv coordinate on texture
+/// ## Arguments
+/// - `f` - the face
+/// ## Return
+/// - the uv coordinate of this specific face
 fn face_to_uv_coordinate(f: CubeFace) -> [f32; 2] {
     match f {
         CubeFace::Front => UV_COORDINATE_0,
@@ -244,6 +271,12 @@ fn face_to_uv_coordinate(f: CubeFace) -> [f32; 2] {
     }
 }
 
+/// compute uv coordinate for a unit sphere vertex
+/// ## Arguments
+/// - `pt` - the location of sphere vertex, range of `[-1, 1]`
+/// - `f` - the face that this vertex belongs to in its original cube
+/// ## Return
+/// - the uv coordinate on that specific vertex
 fn unit_sphere_point_to_uv(pt: &[f32; 3], f: CubeFace) -> [f32; 2] {
     let x = pt[0];
     let y = pt[1];
@@ -311,7 +344,12 @@ fn insert_indices(n: u32, indices: &mut Vec<u32>) {
 }
 
 impl CubeSphere {
-    // unit sphere point to all possible uv location
+    /// compute uv coordinate for a unit sphere vertex
+    /// ## Arguments
+    /// - `pt` - the location of sphere vertex, range of `[-1, 1]`
+    /// ## Return
+    /// - all possible uv coordinates for that specific vertex, please assign
+    ///   the same value for these coordinates in the texture
     pub fn point_to_uvs(pt: &[f32; 3]) -> [[f32; 2]; 3] {
         let x = pt[0];
         let y = pt[1];
@@ -338,6 +376,11 @@ impl CubeSphere {
         [face_x, face_y, face_z]
     }
 
+    /// convert uv coordinate to corresponding face
+    /// ## Arguments
+    /// - `uv` - the uv coordinate
+    /// ## Return
+    /// - the corresponding face
     fn uv_to_face(uv: &[f32; 2]) -> CubeFace {
         [
             CubeFace::Front,
@@ -360,6 +403,11 @@ impl CubeSphere {
         .unwrap()
     }
 
+    /// compute the unit sphere vertex based on uv coordinate
+    /// ## Arguments
+    /// - `uv` - the uv coordinate, range of `[0, 1]`
+    /// ## Return
+    /// - the unit sphere vertex, `None` means that uv coordinate map to nowhere on the surface of the sphere
     pub fn uv_to_point(uv: &[f32; 2]) -> Option<[f32; 3]> {
         let face = CubeSphere::uv_to_face(uv);
         let coord = face_to_uv_coordinate(face);
@@ -379,10 +427,20 @@ impl CubeSphere {
         }
     }
 
+    /// compute the normal vector vertex based on uv coordinate
+    /// ## Arguments
+    /// - `uv` - the uv coordinate, range of `[0, 1]`
+    /// ## Return
+    /// - the normal vector, `None` means that uv coordinate map to nowhere on the surface of the sphere
     pub fn uv_to_normal(uv: &[f32; 2]) -> Option<[f32; 3]> {
         CubeSphere::uv_to_point(uv).map(|pt| unit_sphere_point_to_normal(&pt))
     }
 
+    /// compute the tangent vector vertex based on uv coordinate
+    /// ## Arguments
+    /// - `uv` - the uv coordinate, range of `[0, 1]`
+    /// ## Return
+    /// - the tangent vector, `None` means that uv coordinate map to nowhere on the surface of the sphere
     pub fn uv_to_tangent(uv: &[f32; 2]) -> Option<[f32; 4]> {
         let face = CubeSphere::uv_to_face(uv);
         CubeSphere::uv_to_point(uv).map(|pt| unit_sphere_point_to_tangent(&pt, face))
