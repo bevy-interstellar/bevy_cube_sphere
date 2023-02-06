@@ -14,7 +14,7 @@ In all examples except `uv_generation`, `Up`, `Down`, `Left`, `Right` key can mo
 
 ## License
 
-This project is Apache License Version 2.0 and MIT License dual licensed.
+This project is under MIT License and Apache 2.0.
 
 ## Reference
 
